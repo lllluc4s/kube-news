@@ -2,24 +2,26 @@ pipeline{
     agent any
 
     stages{
-        stage('Build'){
+        stage('Build Docker Image'){
             steps{
                 echo 'Building...'
                 script{
                     dockerapp = docker.build(
-                        "r0drigu3s/kube-news:${env.BUILD_ID}", "-f ./src/Dockerfile ./src"
+                        "r0drigu3s/kube-news:${env.BUILD_ID}", '-f ./src/Dockerfile ./src'
                         )
                 }
             }
         }
-        stage('Test'){
+
+        stage('Push Docker Image'){
             steps{
-                echo 'Testing...'
-            }
-        }
-        stage('Deploy'){
-            steps{
-                echo 'Deploying...'
+                echo 'Pushing...'
+                script{
+                    docke.withRegistry('https://registry.hub.docker.com', 'dockerhub'){
+                        dockerapp.push('latest')
+                        dockerapp.push("${env.BUILD_ID}")
+                    }
+                }
             }
         }
     }
